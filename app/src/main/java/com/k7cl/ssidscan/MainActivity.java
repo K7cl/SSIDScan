@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.yanzhenjie.permission.Action;
 import com.yanzhenjie.permission.AndPermission;
@@ -52,11 +53,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.refresh:
-                boolean success = wifiManager.startScan();
-                if (!success) {
-                    // scan failure handling
-                    scanFailure();
+                if (hasPermiison){
+                    boolean success = wifiManager.startScan();
+                    if (!success) {
+                        // scan failure handling
+                        scanFailure();
+                    }else {
+                        Toast.makeText(context,"Scanning......",Toast.LENGTH_SHORT).show();
+                    }
+                }else {
+                    Toast.makeText(context,"No Location Permission!",Toast.LENGTH_SHORT).show();
                 }
+
                 break;
             case R.id.wlanSwitch:
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_DISABLED){
@@ -117,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onAction(List<String> permissions) {
                     // TODO what to do
+                    hasPermiison = false;
+                    Toast.makeText(context,"No Location Permission!",Toast.LENGTH_SHORT).show();
                     AndPermission.with(context)
                         .runtime()
                         .setting()
@@ -138,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void scanSuccess() {
         List<ScanResult> results = wifiManager.getScanResults();
-        Log.d("scan","success");
+        Toast.makeText(context,"Scan Finish!",Toast.LENGTH_SHORT).show();
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
 
         for(int i=0;i<results.size();i++){
@@ -159,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // handle failure: new scan did NOT succeed
         // consider using old scan results: these are the OLD results!
         List<ScanResult> results = wifiManager.getScanResults();
-        Log.w("scan","faild");
+        Toast.makeText(context,"Scan Failed!",Toast.LENGTH_SHORT).show();
     }
 
     public void setList(List<Map<String, String>> ssidlist){
