@@ -1,24 +1,22 @@
 package com.k7cl.ssidscan;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.ListActivity;
+import androidx.core.content.ContextCompat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Switch;
 import android.widget.Toast;
-
 import com.yanzhenjie.permission.Action;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
@@ -45,8 +43,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         onoff = (Switch) findViewById(R.id.wlanSwitch);
         onoff.setOnClickListener(this);
         list = (ListView) findViewById(R.id.list);
+        initWifiManager();
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED){
+            onoff.setChecked(true);
+        }
         chkPermiison();
-
     }
 
     @Override
@@ -62,9 +63,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(context,"Scanning......",Toast.LENGTH_SHORT).show();
                     }
                 }else {
-                    Toast.makeText(context,"No Location Permission!",Toast.LENGTH_SHORT).show();
+                    if (ContextCompat.checkSelfPermission(context, Permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(context, Permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                        hasPermiison = true;
+                        boolean success = wifiManager.startScan();
+                        if (!success) {
+                            // scan failure handling
+                            scanFailure();
+                        }else {
+                            Toast.makeText(context,"Scanning......",Toast.LENGTH_SHORT).show();
+                        }
+                    }else {
+                        Toast.makeText(context,"No Location Permission!",Toast.LENGTH_SHORT).show();
+                    }
                 }
-
                 break;
             case R.id.wlanSwitch:
                 if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_DISABLED){
@@ -111,14 +122,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onAction(List<String> permissions) {
                     // TODO what to do.
                     hasPermiison = true;
-                    initWifiManager();
                     boolean success = wifiManager.startScan();
                     if (!success) {
                         // scan failure handling
                         scanFailure();
-                    }
-                    if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED){
-                        onoff.setChecked(true);
                     }
                 }
             }).onDenied(new Action<List<String>>() {
