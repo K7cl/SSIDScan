@@ -1,0 +1,2 @@
+rootProject.name = "ssidscan"
+include ':app'
