@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     WifiManager wifiManager;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Switch onoff;
     ListView list;
     boolean hasPermiison;
+    String[][] arraySSIDs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             onoff.setChecked(true);
         }
         chkPermiison();
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            //parent 代表listView View 代表 被点击的列表项 position 代表第几个 id 代表列表编号
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, id+"", Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent();
+                intent.setClass(MainActivity.this, SecInfo.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -167,6 +181,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             map.put("enc", results.get(i).capabilities);
             map.put("sig", String.valueOf(results.get(i).level));
             list.add(map);
+
+            arraySSIDs[i][0] = SSID;
         }
         setList(list);
 
@@ -201,11 +217,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public static String chkSSID(String string) {
+        String pattern = "%p(%s)+%n";
+        boolean isMatch = Pattern.matches(pattern, string);
+        if(isMatch){
+            return "危险";
+        }
+//        if(string.equals("%p%s%s%s%s%n")){
+//            return "危险";
+//        }
         for (int i = 0; i < string.length(); i++) {
             char c = string.charAt(i);
             String  u = Integer.toHexString(c);
             if (Integer.parseInt(u,16)<126 || (Integer.parseInt(u,16)>=19968 && Integer.parseInt(u,16)<=40959)){
-            }else {
+            } else {
                 Log.e("danger",string);
                 return "危险";
             }
