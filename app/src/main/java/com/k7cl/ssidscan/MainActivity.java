@@ -7,9 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,12 +21,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.yanzhenjie.permission.Action;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +41,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Switch onoff;
     ListView list;
     boolean hasPermiison;
-    String[][] arraySSIDs;
+    String[][] arraySSIDs = new String[1000][10];
+    static String[] arrayVuls = {
+            "iPhone WiFi 拒绝服务风险\n" +
+                    "影响版本iOS 14.4、iOS 14.6\n"+
+                    "https://www.bleepingcomputer.com/news/security/iphone-bug-breaks-wifi-when-you-join-hotspot-with-unusual-name/",
+            "Evil Twin 攻击风险\n" +
+                    "SSID中红色标出的为可疑字符。\n" +
+                    "这很可能是一个钓鱼WiFi，攻击者生成一个与正常WiFi名字一样或相似度极高的SSID来进行钓鱼。\n"+
+                    "https://vipread.com/library/topic/3345\n" +
+                    "https://cis.freebuf.com/?id=87"
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +69,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         chkPermiison();
 
+//        setContentView(R.layout.listitem);
+//        TextView SEC = (TextView) findViewById(R.id.sec);
+//        Log.d("SECTextView:", SEC.getText().toString());
+//        if ( SEC.getText().toString() == "危险"){
+//            ForegroundColorSpan redSpan = new ForegroundColorSpan(Color.parseColor("red"));
+//            SpannableStringBuilder builder = new SpannableStringBuilder(SEC.getText().toString());
+//            builder.setSpan(redSpan, 0, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//            SEC.setText(builder);
+//
+//        }
+
+
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             //parent 代表listView View 代表 被点击的列表项 position 代表第几个 id 代表列表编号
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, id+"", Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(MainActivity.this, id+"", Toast.LENGTH_SHORT).show();
+
                 Intent intent=new Intent();
                 intent.setClass(MainActivity.this, SecInfo.class);
+                Bundle bundle = new Bundle();
+                bundle.putStringArray("arraySSID", arraySSIDs[position]);
+                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
@@ -171,18 +205,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         List<ScanResult> results = wifiManager.getScanResults();
         Toast.makeText(context,"Scan Finish!",Toast.LENGTH_SHORT).show();
         List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+//        arraySSIDs = null;
 
         for(int i=0;i<results.size();i++){
             String SSID = results.get(i).SSID;
             Log.d("scan",SSID);
             Map<String, String> map = new HashMap<String, String>();
             map.put("ssid", SSID);
-            map.put("sec", chkSSID(SSID));
+            map.put("sec", chkSSID(SSID)[0]);
             map.put("enc", results.get(i).capabilities);
             map.put("sig", String.valueOf(results.get(i).level));
             list.add(map);
 
-            arraySSIDs[i][0] = SSID;
+            arraySSIDs[i][0] = results.get(i).SSID;
+            arraySSIDs[i][1] = results.get(i).BSSID;
+            arraySSIDs[i][2] = results.get(i).capabilities;
+            arraySSIDs[i][3] = chkSSID(SSID)[1];
+            arraySSIDs[i][4] = chkSSID(SSID)[2];
         }
         setList(list);
 
@@ -216,11 +255,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return unicode.toString();
     }
 
-    public static String chkSSID(String string) {
+    public String[] chkSSID(String string) {
         String pattern = "%p(%s)+%n";
         boolean isMatch = Pattern.matches(pattern, string);
         if(isMatch){
-            return "危险";
+            String[] r = {"危险", arrayVuls[0], "0"};
+            return r;
         }
 //        if(string.equals("%p%s%s%s%s%n")){
 //            return "危险";
@@ -231,9 +271,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (Integer.parseInt(u,16)<126 || (Integer.parseInt(u,16)>=19968 && Integer.parseInt(u,16)<=40959)){
             } else {
                 Log.e("danger",string);
-                return "危险";
+                String[] r = {"危险", arrayVuls[1], String.valueOf(i+1)};
+                return r;
             }
         }
-        return "安全";
+        String[] r = {"安全", "", "0"};
+        return r;
     }
 }

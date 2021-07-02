@@ -7,10 +7,11 @@
     tools:context=".SecInfo">
 
     <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="729dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="1dp">
 
         <LinearLayout
@@ -32,6 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:textSize="20sp"
                 android:text="SSID value" />
         </LinearLayout>
 
@@ -67,9 +69,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
+                android:text="加密方式:"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:text="加密方式:" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/encrypt2"
@@ -81,7 +83,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="83dp"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <TextView
@@ -89,15 +91,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="2"
+                android:text="漏洞信息:"
                 android:textSize="20sp"
-                android:textStyle="bold"
-                android:text="漏洞信息:" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/vuls2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:autoLink="all"
                 android:text="vuls value" />
         </LinearLayout>
     </LinearLayout>
