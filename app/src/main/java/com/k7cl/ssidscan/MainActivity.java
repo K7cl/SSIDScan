@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -234,13 +235,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toast.makeText(context,"Scan Failed!",Toast.LENGTH_SHORT).show();
     }
 
+    public void colorSec(){
+        list.post(new Runnable() {
+            public void run() {
+                int start = list.getFirstVisiblePosition();
+                for (int i = start, j = list.getLastVisiblePosition(); i <= j; i++){
+                    View view = list.getChildAt(i);
+                    Log.e("id",String.valueOf(i));
+                    TextView sec = view.findViewById(R.id.sec);
+                    if (sec.getText() == "危险"){
+                        sec.setTextColor(Color.RED);
+                    }else {
+//                        sec.setTextColor(Color.GREEN);
+                    }
+                }
+
+            }
+        });
+    }
+
     public void setList(List<Map<String, String>> ssidlist){
 
         SimpleAdapter adapter = new SimpleAdapter(this,ssidlist,R.layout.listitem,
                 new String[]{"ssid","sec","enc","sig"},
                 new int[]{R.id.ssid,R.id.sec,R.id.enc,R.id.sig});
-
         list.setAdapter(adapter);
+        colorSec();
     }
 
     public static String string2Unicode(String string) {
